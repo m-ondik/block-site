@@ -16,6 +16,7 @@ const getAll = () => get([
   "counterShow",
   "counterPeriod",
   "resolution",
+  //"withinTime" //added
 ]);
 
 export default {

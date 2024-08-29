@@ -4,6 +4,8 @@ import getBlockedMessage from "./helpers/get-blocked-message";
 window.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
 
+  //let dateTime = new Date() //on enable extension, start a timer for given amount of time 
+
   const url = params.get("url");
   if (!url) {
     return;

@@ -21,6 +21,7 @@ export interface Schema {
   counterShow: boolean
   counterPeriod: CounterPeriod
   resolution: Resolution
+  //withinTime: boolean //added
 }
 
 export const DEFAULTS: Readonly<Schema> = {
@@ -31,6 +32,7 @@ export const DEFAULTS: Readonly<Schema> = {
   counterShow: false,
   counterPeriod: "ALL_TIME",
   resolution: "CLOSE_TAB",
+  //withinTime: false //added
 };
 
 export const VALIDATORS: Readonly<Record<keyof Schema, (value: unknown) => boolean>> = {
@@ -41,6 +43,7 @@ export const VALIDATORS: Readonly<Record<keyof Schema, (value: unknown) => boole
   counterShow: (value) => typeof value === "boolean",
   counterPeriod: (value) => COUNTER_PERIODS.includes(value as CounterPeriod),
   resolution: (value) => RESOLUTIONS.includes(value as Resolution),
+  //withinTime: (value) => typeof value === "boolean" //added
 };
 
 export const BLOCKED_EXAMPLE: string[] = [
