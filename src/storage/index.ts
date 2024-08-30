@@ -16,6 +16,15 @@ const getAll = () => get([
   "counterShow",
   "counterPeriod",
   "resolution",
+  "timer",
+  "rangeStartHour",
+  "rangeStartMinute",
+  "rangeStartAMPM",
+  "rangeEndHour",
+  "rangeEndMinute",
+  "rangeEndAMPM",
+  "durationHours",
+  "durationMinutes"
   //"withinTime" //added
 ]);
 

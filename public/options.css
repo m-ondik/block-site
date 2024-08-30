@@ -68,6 +68,12 @@ body:not(.counter-show) #counter-period-option {
   flex-direction: column;
 }
 
+.row {
+  display: flex; /* Use flexbox to align elements in a row */
+  gap: 20px; /* Add some space between the elements */
+  align-items: center; /* Vertically center the items */
+}
+
 label {
   font-weight: bold;
   margin-right: .6em;

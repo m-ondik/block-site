@@ -2,12 +2,15 @@ import initStorage from "./storage/init";
 import storage from "./storage";
 import recreateContextMenu from "./helpers/recreate-context-menu";
 import blockSite from "./helpers/block-site";
-// import withinTime from "./helpers/check-time";
+import {checkTimeRange} from "./helpers/check-time";
+// import {checkTimeDuration} from "./helpers/check-time";
 
 let __enabled: boolean;
 let __contextMenu: boolean;
 let __blocked: string[];
-let __withinTime = false; //added
+let __then: Date = new Date();
+let __withinTimeRange = false; //added
+let __withinTimeDuration = false;
 
 initStorage().then(() => {
   storage.get(["enabled", "contextMenu", "blocked"]).then(({ enabled, contextMenu, blocked }) => {
@@ -24,19 +27,10 @@ initStorage().then(() => {
     }
   });
 
-  function checkTime(startHour: number, startMinute: number, endHour: number, endMinute: number) { //(timeCheck: String): boolean => {
-    const now = new Date();
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    const startMinutes = startHour * 60 + startMinute;
-    const endMinutes = endHour * 60 + endMinute;
-
-    return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
-  } 
-
   function updateWithinTime() {
-    __withinTime = checkTime(9, 0, 11, 48);
-    console.log("__withinTime updated:", __withinTime);
-    // Perform any additional actions based on the value of __withinTime
+    __withinTimeRange = checkTimeRange(9, 0, 11, 48);
+    console.log("__withinTimeRange updated:", __withinTimeRange);
+    // Perform any additional actions based on the value of __withinTimeRange
   }
 
   updateWithinTime();
@@ -70,8 +64,8 @@ chrome.action.onClicked.addListener(() => {
 });
 
 chrome.webNavigation.onBeforeNavigate.addListener((details) => {
-  console.log(__withinTime)
-  if (!__enabled || !__blocked.length || !__withinTime) {
+  console.log(__withinTimeRange)
+  if (!__enabled || !__blocked.length || !__withinTimeRange) {
     return;
   }
 
@@ -80,15 +74,12 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
     return;
   }
 
-  // if (!__withinTime){
-  //   return;
-  // }
   blockSite({ blocked: __blocked, tabId, url });
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
-  console.log(__withinTime)
-  if (!tabId || !__enabled || !__blocked.length || !__withinTime) {
+  console.log(__withinTimeRange)
+  if (!tabId || !__enabled || !__blocked.length || !__withinTimeRange) {
     return;
   }
 
@@ -97,8 +88,5 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
     return;
   }
 
-  // if (!__withinTime){
-  //   return;
-  // }
   blockSite({ blocked: __blocked, tabId, url });
 });
