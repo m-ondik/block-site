@@ -35,14 +35,13 @@ export interface Schema {
   counterPeriod: CounterPeriod
   resolution: Resolution
   timer: Timer
-  rangeStartHour: number
-  rangeStartMinute: number
+  rangeStartTime: string
   rangeStartAMPM: AmPm
-  rangeEndHour: number
-  rangeEndMinute: number
+  rangeEndTime: string
   rangeEndAMPM: AmPm
   durationHours: number
   durationMinutes: number
+  then: Date
 }
 
 export const DEFAULTS: Readonly<Schema> = {
@@ -54,14 +53,13 @@ export const DEFAULTS: Readonly<Schema> = {
   counterPeriod: "ALL_TIME",
   resolution: "CLOSE_TAB",
   timer: "OFF",
-  rangeStartHour: 9,
-  rangeStartMinute: 0,
+  rangeStartTime: "9:00",
   rangeStartAMPM: "AM",
-  rangeEndHour: 5,
-  rangeEndMinute: 0,
+  rangeEndTime: "5:00",
   rangeEndAMPM: "PM",
   durationHours: 0,
-  durationMinutes: 0
+  durationMinutes: 0,
+  then: new Date()
 };
 
 export const VALIDATORS: Readonly<Record<keyof Schema, (value: unknown) => boolean>> = {
@@ -73,14 +71,13 @@ export const VALIDATORS: Readonly<Record<keyof Schema, (value: unknown) => boole
   counterPeriod: (value) => COUNTER_PERIODS.includes(value as CounterPeriod),
   resolution: (value) => RESOLUTIONS.includes(value as Resolution),
   timer: (value) => TIMERS.includes(value as Timer),
-  rangeStartHour: (value) => typeof value === "number",
-  rangeStartMinute: (value) => typeof value === "number",
+  rangeStartTime: (value) => typeof value === "string",
   rangeStartAMPM: (value) => AMPM.includes(value as AmPm),
-  rangeEndHour: (value) => typeof value === "number",
-  rangeEndMinute: (value) => typeof value === "number",
+  rangeEndTime: (value) => typeof value === "string",
   rangeEndAMPM: (value) => AMPM.includes(value as AmPm),
   durationHours: (value) => typeof value === "number",
-  durationMinutes: (value) => typeof value === "number"
+  durationMinutes: (value) => typeof value === "number",
+  then: (value) => value instanceof Date && !isNaN(value.getTime())
 };
 
 export const BLOCKED_EXAMPLE: string[] = [
@@ -97,5 +94,5 @@ export const BLOCKED_EXAMPLE: string[] = [
   "example.com/app/*",
 ];
 
-export const START_EXAMPLE: string = "9:30";
-export const END_EXAMPLE: string = "5:30";
+// export const START_EXAMPLE: string = "9:00";
+// export const END_EXAMPLE: string = "5:00";
