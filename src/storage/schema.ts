@@ -10,8 +10,9 @@ export const COUNTER_PERIODS = [
   "TODAY",
 ] as const;
 
-export const TIMERS = [
-  "OFF",
+export const TIMERS = ["YES", "NO"] as const;
+
+export const TIMER_MODES = [
   "RANGE",
   "DURATION"
 ] as const;
@@ -23,7 +24,7 @@ export const AMPM = [
 
 export type Resolution = typeof RESOLUTIONS[number];
 export type CounterPeriod = typeof COUNTER_PERIODS[number];
-export type Timer = typeof TIMERS[number];
+export type TimerMode = typeof TIMER_MODES[number];
 export type AmPm = typeof AMPM[number];
 
 export interface Schema {
@@ -34,7 +35,8 @@ export interface Schema {
   counterShow: boolean
   counterPeriod: CounterPeriod
   resolution: Resolution
-  timer: Timer
+  timer: boolean
+  timerMode: TimerMode
   rangeStartTime: string
   rangeStartAMPM: AmPm
   rangeEndTime: string
@@ -52,7 +54,8 @@ export const DEFAULTS: Readonly<Schema> = {
   counterShow: false,
   counterPeriod: "ALL_TIME",
   resolution: "CLOSE_TAB",
-  timer: "OFF",
+  timer: false,
+  timerMode: "RANGE",
   rangeStartTime: "9:00",
   rangeStartAMPM: "AM",
   rangeEndTime: "5:00",
@@ -70,7 +73,8 @@ export const VALIDATORS: Readonly<Record<keyof Schema, (value: unknown) => boole
   counterShow: (value) => typeof value === "boolean",
   counterPeriod: (value) => COUNTER_PERIODS.includes(value as CounterPeriod),
   resolution: (value) => RESOLUTIONS.includes(value as Resolution),
-  timer: (value) => TIMERS.includes(value as Timer),
+  timer: (value) => typeof value === "boolean",
+  timerMode: (value) => TIMER_MODES.includes(value as TimerMode),
   rangeStartTime: (value) => typeof value === "string",
   rangeStartAMPM: (value) => AMPM.includes(value as AmPm),
   rangeEndTime: (value) => typeof value === "string",

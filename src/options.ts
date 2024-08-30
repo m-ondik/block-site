@@ -1,7 +1,5 @@
 import storage, {
-  Schema, Resolution, CounterPeriod, Timer, AmPm, RESOLUTIONS, BLOCKED_EXAMPLE, 
-  // START_EXAMPLE,
-  // END_EXAMPLE,
+  Schema, Resolution, CounterPeriod, TimerMode, AmPm, RESOLUTIONS, TIMERS, TIMER_MODES, BLOCKED_EXAMPLE, 
 } from "./storage";
 
 const UI = (() => {
@@ -13,6 +11,7 @@ const UI = (() => {
     counterShow: document.getElementById("counter-show") as HTMLSelectElement,
     counterPeriod: document.getElementById("counter-period") as HTMLSelectElement,
     timer: document.getElementById("timer") as HTMLSelectElement,
+    timerMode: document.getElementById("timer-mode") as HTMLSelectElement,
     rangeStartTime: document.getElementById("start-time") as HTMLTextAreaElement,
     rangeStartAMPM: document.getElementById("start-am-pm") as HTMLSelectElement,
     rangeEndTime: document.getElementById("end-time") as HTMLTextAreaElement,
@@ -21,8 +20,6 @@ const UI = (() => {
     durationMinutes: document.getElementById("minutes") as HTMLTextAreaElement,
   };
 
-  // elements.rangeStartTime.placeholder = START_EXAMPLE;
-  // elements.rangeEndTime.placeholder = END_EXAMPLE;
   elements.blockedList.placeholder = BLOCKED_EXAMPLE.join("\n");
 
   const booleanToString = (b: boolean) => b ? "YES" : "NO";
@@ -62,40 +59,54 @@ const UI = (() => {
   });
 
   elements.timer.addEventListener("change", (event) => {
-    const selectedValue = getEventTargetValue(event) as Timer;
-    document.body.classList.remove("timer-RANGE", "timer-DURATION");
+    const selectedValue = stringToBoolean(getEventTargetValue(event));
+    document.body.classList.remove("timer-YES", "time-NO");
+
+    if (selectedValue){
+      document.body.classList.add("timer-YES");
+      document.body.classList.add("timer-details-RANGE");
+    } else if (!selectedValue) {
+      document.body.classList.add("timer-NO");
+    }
+
+    storage.set({ timer: selectedValue});
+  });
+
+  elements.timerMode.addEventListener("change", (event) => {
+    const selectedValue = getEventTargetValue(event) as TimerMode;
+    document.body.classList.remove("timer-details-RANGE", "timer-details-DURATION");
     
     if (selectedValue === "RANGE") {
-      document.body.classList.add("timer-RANGE");
+      document.body.classList.add("timer-details-RANGE");
     } else if (selectedValue === "DURATION") {
-      document.body.classList.add("timer-DURATION");
+      document.body.classList.add("timer-details-DURATION");
     }
     const date = new Date();
     
     // Save the selected value in storage if needed
     storage.set({ then: date });
-    storage.set({ timer: selectedValue });
+    storage.set({ timerMode: selectedValue });
   });
 
-  elements.rangeStartTime.addEventListener("input", (event) => {
-    const rangeStartTime = getEventTargetValue(event);
-    storage.set({ rangeStartTime });
-  });
+  // elements.rangeStartTime.addEventListener("input", (event) => {
+  //   const rangeStartTime = getEventTargetValue(event);
+  //   storage.set({ rangeStartTime });
+  // });
 
-  elements.rangeStartAMPM.addEventListener("change", (event) => {
-    const rangeStartAMPM = getEventTargetValue(event) as AmPm;
-    storage.set({ rangeStartAMPM });
-  });
+  // elements.rangeStartAMPM.addEventListener("change", (event) => {
+  //   const rangeStartAMPM = getEventTargetValue(event) as AmPm;
+  //   storage.set({ rangeStartAMPM });
+  // });
 
-  elements.rangeEndTime.addEventListener("input", (event) => {
-    const rangeEndTime = getEventTargetValue(event);
-    storage.set({ rangeEndTime });
-  });
+  // elements.rangeEndTime.addEventListener("input", (event) => {
+  //   const rangeEndTime = getEventTargetValue(event);
+  //   storage.set({ rangeEndTime });
+  // });
 
-  elements.rangeEndAMPM.addEventListener("change", (event) => {
-    const rangeEndAMPM = getEventTargetValue(event) as AmPm;
-    storage.set({ rangeEndAMPM });
-  });
+  // elements.rangeEndAMPM.addEventListener("change", (event) => {
+  //   const rangeEndAMPM = getEventTargetValue(event) as AmPm;
+  //   storage.set({ rangeEndAMPM });
+  // });
 
   elements.durationHours.addEventListener("input", (event) => {
     const durationHours = Number(getEventTargetValue(event));
@@ -142,24 +153,28 @@ const UI = (() => {
     }
 
     if (items.timer !== undefined) {
-      elements.timer.value = items.timer;
+      elements.timer.value = booleanToString(items.timer);
     }
 
-    if (items.rangeStartTime !== undefined) {
-      elements.rangeStartTime.value = items.rangeStartTime;
+    if (items.timerMode !== undefined) {
+      elements.timerMode.value = items.timerMode;
     }
 
-    if (items.rangeStartAMPM !== undefined) {
-      elements.rangeStartAMPM.value = items.rangeStartAMPM;
-    }
+    // if (items.rangeStartTime !== undefined) {
+    //   elements.rangeStartTime.value = items.rangeStartTime;
+    // }
 
-    if (items.rangeEndTime !== undefined) {
-      elements.rangeEndTime.value = items.rangeEndTime;
-    }
+    // if (items.rangeStartAMPM !== undefined) {
+    //   elements.rangeStartAMPM.value = items.rangeStartAMPM;
+    // }
 
-    if (items.rangeEndAMPM !== undefined) {
-      elements.rangeEndAMPM.value = items.rangeEndAMPM;
-    }
+    // if (items.rangeEndTime !== undefined) {
+    //   elements.rangeEndTime.value = items.rangeEndTime;
+    // }
+
+    // if (items.rangeEndAMPM !== undefined) {
+    //   elements.rangeEndAMPM.value = items.rangeEndAMPM;
+    // }
 
     if (items.durationHours !== undefined) {
       elements.durationHours.value = items.durationHours.toString();
@@ -180,15 +195,14 @@ window.addEventListener("DOMContentLoaded", () => {
     "blocked",
     "resolution",
     "counterShow",
-    "counterPeriod"
-    // ,
-    // "timer",
+    "counterPeriod",
+    "timer",
     // "rangeStartTime",
     // "rangeStartAMPM",
     // "rangeEndTime",
     // "rangeEndAMPM",
-    // "durationHours",
-    // "durationMinutes"
+    "durationHours",
+    "durationMinutes"
   ];
 
   storage.get(keys).then((local) => {

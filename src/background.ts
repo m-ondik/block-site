@@ -10,7 +10,8 @@ let __enabled: boolean;
 let __contextMenu: boolean;
 let __blocked: string[];
 let __then: Date;
-let __timer: string;
+let __timer: boolean;
+let __timerMode: string;
 let __rangeStartTime: number;
 let __rangeStartAMPM: string;
 let __rangeEndTime: number;
@@ -21,11 +22,12 @@ let __withinTimeRange = false; //added
 let __withinTimeDuration = false;
 
 initStorage().then(() => {
-  storage.get(["enabled", "contextMenu", "blocked", "then", "timer" , "rangeStartTime", "rangeStartAMPM", "rangeEndTime", "rangeEndAMPM", "durationHours", "durationMinutes"]).then(({ enabled, contextMenu, blocked, then, timer, rangeStartTime, rangeStartAMPM, rangeEndTime, rangeEndAMPM, durationHours, durationMinutes }) => {
+  storage.get(["enabled", "contextMenu", "blocked", "then", "timer", "timerMode", "rangeStartTime", "rangeStartAMPM", "rangeEndTime", "rangeEndAMPM", "durationHours", "durationMinutes"]).then(({ enabled, contextMenu, blocked, then, timer, timerMode, rangeStartTime, rangeStartAMPM, rangeEndTime, rangeEndAMPM, durationHours, durationMinutes }) => {
     __enabled = enabled;
     __contextMenu = contextMenu;
     __blocked = blocked;
     __timer = timer;
+    __timerMode = timerMode;
     __then = then;
     __rangeStartTime = convertTimeToMinutes(rangeStartTime);
     __rangeStartAMPM = rangeStartAMPM;
@@ -61,7 +63,7 @@ initStorage().then(() => {
   updateWithinDuration();
   setInterval(updateWithinDuration, 60000);
 
-  chrome.storage.local.onChanged.addListener((changes) => { //This is where we add the time settings inputs from user.
+  chrome.storage.local.onChanged.addListener((changes) => {
     if (changes.myTimeKey) {
       updateWithinTime();
       updateWithinDuration();
@@ -84,7 +86,7 @@ initStorage().then(() => {
     }
 
     if (changes["timer"]) {
-      __timer = changes["timer"].newValue as string;
+      __timer = changes["timer"].newValue as boolean;
     }
 
     if (changes["then"]) {
@@ -130,12 +132,12 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
 
   const { tabId, url, frameId } = details;
   if (!url || !url.startsWith("http") || frameId !== 0) {
-    console.log("returned on 2; timer:", __timer);
+    console.log("returned on 2; timer:", __timerMode);
     return;
   }
   console.log("timer:", __timer);
 
-  if (__timer === "RANGE") {
+  if (__timerMode === "RANGE") {
     if (__withinTimeRange){
       console.log("__withinTimeRange:", __withinTimeRange);
       blockSite({ blocked: __blocked, tabId, url });
@@ -143,7 +145,7 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
       console.log("return:", __withinTimeRange);
       return;
     }
-  } else if (__timer === "DURATION") {
+  } else if (__timerMode === "DURATION") {
     if (__withinTimeDuration){
       console.log("__withinTimeDuration:", __withinTimeDuration);
       blockSite({ blocked: __blocked, tabId, url });
@@ -168,10 +170,14 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
 
   const { url } = changeInfo;
   if (!url || !url.startsWith("http")) {
-    console.log("returned on 4; timer:", __timer);
+    console.log("returned on 4; timer:", __timerMode);
     return;
   }
-  if (__timer === "RANGE") {
+
+  if (!__timer) {
+    console.log("block");
+    blockSite({ blocked: __blocked, tabId, url });
+  } else  if (__timerMode === "RANGE") {
     if (__withinTimeRange){
       console.log("__withinTimeRange:", __withinTimeRange);
       blockSite({ blocked: __blocked, tabId, url });
@@ -179,7 +185,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
       console.log("return:", __withinTimeRange);
       return;
     }
-  } else if (__timer === "DURATION") {
+  } else if (__timerMode === "DURATION") {
     if (__withinTimeDuration){
       console.log("__withinTimeDuration:", __withinTimeDuration);
       blockSite({ blocked: __blocked, tabId, url });
@@ -188,8 +194,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
       return;
     }
   } else {
-    console.log("block");
-    blockSite({ blocked: __blocked, tabId, url });
+    return;
   }
 
 });

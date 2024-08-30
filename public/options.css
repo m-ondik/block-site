@@ -11,11 +11,15 @@ body:not(.counter-show) #counter-period-option {
   display: none;
 }
 
-body:not(.timer-RANGE) #timer-range-details {
+body:not(.timer-YES) #timer-details { /*&& .timer-details-RANGE        && .timer-details-RANGE  */
   display: none;
 }
 
-body:not(.timer-DURATION) #timer-duration-details {
+body:not(.timer-details-RANGE) #timer-range-details {
+  display: none;
+}
+
+body:not(.timer-details-DURATION) #timer-duration-details {
   display: none;
 }
 

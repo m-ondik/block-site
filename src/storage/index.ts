@@ -17,6 +17,7 @@ const getAll = () => get([
   "counterPeriod",
   "resolution",
   "timer",
+  "timerMode",
   "rangeStartTime",
   "rangeStartAMPM",
   "rangeEndTime",

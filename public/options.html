@@ -34,59 +34,67 @@
     </div>
 
     <div class="options">
-      <div id="timer-option" class="option-baseline">
+      <div id="timer-option" class="option baseline">
         <label>Timer?</label>
         <div>
           <select id="timer">
-            <option value="OFF">Off</option>
-            <option value="RANGE">Range</option>
-            <option value="DURATION">Duration</option>
+            <option value="YES">Yes</option>
+            <option value="NO">No</option>
           </select>
 
-          <fieldset id="timer-range-details">
-            <legend>Range Details</legend>
+          <fieldset id="timer-details">
+            <div class="option">
+              <label>Mode?</label>
+              <select id="timer-mode">
+                <option value="RANGE">Range</option>
+                <option value="DURATION">Duration</option>
+              </select>
+            </div>
+
+            <fieldset id="timer-range-details">
+              <legend>Range Details</legend>
+              <div class="row">
+                <div class="option">
+                  <label for="start-time">Start Hour:</label>
+                  <textarea id="start-time" rows="1" cols="5" spellcheck="false"></textarea>
+                </div>
+                <div class="option">
+                  <label class="hidden-label">AM/PM:</label>
+                  <select id="start-am-pm">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+                <div class="option">
+                  <label for="end-time">End Hour:</label>
+                  <textarea id="end-time" rows="1" cols="5" spellcheck="false"></textarea>
+                </div>          
+                <div class="option">
+                  <label class="hidden-label">AM/PM:</label>
+                  <select id="end-am-pm">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
+            </fieldset>
+          </fieldset>
+
+          <fieldset id="timer-duration-details">
+            <legend>Duration Details</legend>
             <div class="row">
               <div class="option">
-                <label for="start-time">Start Hour:</label>
-                <textarea id="start-time" rows="1" cols="5" spellcheck="false"></textarea>
-              </div>
-              
-              <div class="option">
-                <label class="hidden-label">AM/PM:</label>
-                <select id="start-am-pm">
-                  <option value="AM">AM</option>
-                  <option value="PM">PM</option>
-                </select>
+                <label for="hours">Hours:</label>
+                <textarea id="hours" rows="1" cols="3" spellcheck="false"></textarea>
               </div>
               <div class="option">
-                <label for="end-time">End Hour:</label>
-                <textarea id="end-time" rows="1" cols="5" spellcheck="false"></textarea>
-              </div>          
-              <div class="option">
-                <label class="hidden-label">AM/PM:</label>
-                <select id="end-am-pm">
-                  <option value="AM">AM</option>
-                  <option value="PM">PM</option>
-                </select>
+                <label for="minutes">Minutes:</label>
+                <textarea id="minutes" rows="1" cols="2" spellcheck="false"></textarea>
               </div>
             </div>
           </fieldset>
-        </fieldset>
-
-        <fieldset id="timer-duration-details">
-          <legend>Duration Details</legend>
-          <div class="row">
-            <div class="option">
-              <label for="hours">Hours:</label>
-              <textarea id="hours" rows="1" cols="3" spellcheck="false"></textarea>
-            </div>
-            
-            <div class="option">
-              <label for="minutes">Minutes:</label>
-              <textarea id="minutes" rows="1" cols="2" spellcheck="false"></textarea>
-            </div>
-          </div>
-        </fieldset>      
+          
+        </fieldset>  
       </div>
     </div>
   </div>
