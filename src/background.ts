@@ -20,6 +20,19 @@ let __durationHours: number;
 let __durationMinutes: number;
 let __withinTimeRange = false; //added
 let __withinTimeDuration = false;
+let __initialized = false;  // Flag to indicate readiness
+
+function updateWithinTime() {
+  __withinTimeRange = checkTimeRange(__rangeStartTime, __rangeStartAMPM, __rangeEndTime, __rangeEndAMPM);
+  console.log("__withinTimeRange updated:", __withinTimeRange);
+  // Perform any additional actions based on the value of __withinTimeRange
+}
+
+function updateWithinDuration() {
+  __withinTimeDuration = checkTimeDuration(__durationHours, __durationMinutes, __then);
+  console.log("__withinTimeDuration updated:", __withinTimeDuration);
+  // Perform any additional actions based on the value of __withinTimeRange
+}
 
 initStorage().then(() => {
   storage.get(["enabled", "contextMenu", "blocked", "then", "timer", "timerMode", "rangeStartTime", "rangeStartAMPM", "rangeEndTime", "rangeEndAMPM", "durationHours", "durationMinutes"]).then(({ enabled, contextMenu, blocked, then, timer, timerMode, rangeStartTime, rangeStartAMPM, rangeEndTime, rangeEndAMPM, durationHours, durationMinutes }) => {
@@ -36,7 +49,11 @@ initStorage().then(() => {
     __durationHours = durationHours;
     __durationMinutes = durationMinutes;
 
+    updateWithinTime();
+    updateWithinDuration();
     recreateContextMenu(__enabled && __contextMenu);
+
+    __initialized = true; 
   });
 
   chrome.storage.local.get('myTimeKey', (result) => {
@@ -45,32 +62,31 @@ initStorage().then(() => {
     }
   });
 
-  function updateWithinTime() {
-    __withinTimeRange = checkTimeRange(__rangeStartTime, __rangeStartAMPM, __rangeEndTime, __rangeEndAMPM);
-    console.log("__withinTimeRange updated:", __withinTimeRange);
-    // Perform any additional actions based on the value of __withinTimeRange
-  }
+  browser.alarms.create('checkTimers', { periodInMinutes: 1 });
 
-  updateWithinTime();
-  setInterval(updateWithinTime, 60000);
-
-  function updateWithinDuration() {
-    __withinTimeDuration = checkTimeDuration(__durationHours, __durationMinutes, __then);
-    console.log("__withinTimeDuration updated:", __withinTimeDuration);
-    // Perform any additional actions based on the value of __withinTimeRange
-  }
-
-  updateWithinDuration();
-  setInterval(updateWithinDuration, 60000);
+  browser.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === 'checkTimers') {
+      if (__initialized){
+        updateWithinTime();
+        updateWithinDuration();
+      }
+    }
+  });
 
   chrome.storage.local.onChanged.addListener((changes) => {
-    if (changes.myTimeKey) {
+    const timeRelatedChanges = [
+      "timer", "timerMode", "rangeStartTime", "rangeStartAMPM", 
+      "rangeEndTime", "rangeEndAMPM", "durationHours", "durationMinutes"
+    ];
+
+    if (timeRelatedChanges.some((key) => changes[key])) {
       updateWithinTime();
       updateWithinDuration();
     }
 
     if (changes["enabled"]) {
       __enabled = changes["enabled"].newValue as boolean;
+      __then = new Date();
     }
 
     if (changes["contextMenu"]) {
@@ -87,34 +103,46 @@ initStorage().then(() => {
 
     if (changes["timer"]) {
       __timer = changes["timer"].newValue as boolean;
+      updateWithinTime();
+      updateWithinDuration();
     }
 
-    if (changes["then"]) {
-      __then = changes["then"].newValue as Date;
+    if (changes["timerMode"]) {
+      __timerMode = changes["timerMode"].newValue as string;
+      updateWithinTime();
+      updateWithinDuration();
     }
 
     if (changes["rangeStartTime"]) {
       __rangeStartTime = changes["rangeStartTime"].newValue as number;
+      updateWithinTime();
     }
 
     if (changes["rangeStartAMPM"]) {
       __rangeStartAMPM = changes["rangeStartAMPM"].newValue as string;
+      updateWithinTime();
     }
 
     if (changes["rangeEndTime"]) {
       __rangeEndTime = changes["rangeEndTime"].newValue as number;
+      updateWithinTime();
     }
 
     if (changes["rangeEndAMPM"]) {
       __rangeEndAMPM = changes["rangeEndAMPM"].newValue as string;
+      updateWithinTime();
     }
 
     if (changes["durationHours"]) {
       __durationHours = changes["durationHours"].newValue as number;
+      updateWithinDuration();
+      __then = new Date();
     }
 
     if (changes["durationMinutes"]) {
       __durationMinutes = changes["durationMinutes"].newValue as number;
+      updateWithinDuration();
+      __then = new Date();
     }
   });
 });
@@ -123,78 +151,45 @@ chrome.action.onClicked.addListener(() => {
   chrome.runtime.openOptionsPage();
 });
 
-chrome.webNavigation.onBeforeNavigate.addListener((details) => {
-  console.log(__withinTimeRange)
+function handleBlocking(details: any) {
+  if (!__initialized) {
+    console.log("Not initialized yet, skipping blocking.");
+    return;
+  }
+
   if (!__enabled || !__blocked.length) {
-    console.log("returned on 1; timer:", __enabled, __blocked.length);
+    console.log("Blocking skipped: Disabled or no sites blocked.");
     return;
   }
 
   const { tabId, url, frameId } = details;
   if (!url || !url.startsWith("http") || frameId !== 0) {
-    console.log("returned on 2; timer:", __timerMode);
+    console.log("Blocking skipped: Invalid URL or frame.");
     return;
   }
-  console.log("timer:", __timer);
 
-  if (__timerMode === "RANGE") {
-    if (__withinTimeRange){
-      console.log("__withinTimeRange:", __withinTimeRange);
+  if (__timer) {
+    updateWithinTime();
+    updateWithinDuration();
+    if (
+      (__timerMode === "RANGE" && __withinTimeRange) ||
+      (__timerMode === "DURATION" && __withinTimeDuration)
+    ) {
+      console.log("Blocking site:", url);
       blockSite({ blocked: __blocked, tabId, url });
     } else {
-      console.log("return:", __withinTimeRange);
-      return;
-    }
-  } else if (__timerMode === "DURATION") {
-    if (__withinTimeDuration){
-      console.log("__withinTimeDuration:", __withinTimeDuration);
-      blockSite({ blocked: __blocked, tabId, url });
-    } else {
-      console.log("return:", __withinTimeDuration);
-      return;
+      console.log("Blocking skipped: Outside timer range or duration.");
     }
   } else {
-    console.log("block");
+    console.log("Blocking site (no timer):", url);
     blockSite({ blocked: __blocked, tabId, url });
   }
-  
+}
 
-});
 
+chrome.webNavigation.onBeforeNavigate.addListener(handleBlocking); 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
-  console.log(__withinTimeRange)
-  if (!tabId || !__enabled || !__blocked.length) {
-    console.log("returned on 3; timer:", tabId, __enabled, __blocked.length);
-    return;
+  if (changeInfo.url) {
+    handleBlocking({ tabId, url: changeInfo.url, frameId: 0 });
   }
-
-  const { url } = changeInfo;
-  if (!url || !url.startsWith("http")) {
-    console.log("returned on 4; timer:", __timerMode);
-    return;
-  }
-
-  if (!__timer) {
-    console.log("block");
-    blockSite({ blocked: __blocked, tabId, url });
-  } else  if (__timerMode === "RANGE") {
-    if (__withinTimeRange){
-      console.log("__withinTimeRange:", __withinTimeRange);
-      blockSite({ blocked: __blocked, tabId, url });
-    } else {
-      console.log("return:", __withinTimeRange);
-      return;
-    }
-  } else if (__timerMode === "DURATION") {
-    if (__withinTimeDuration){
-      console.log("__withinTimeDuration:", __withinTimeDuration);
-      blockSite({ blocked: __blocked, tabId, url });
-    } else {
-      console.log("return:", __withinTimeDuration);
-      return;
-    }
-  } else {
-    return;
-  }
-
 });

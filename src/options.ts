@@ -12,6 +12,7 @@ const UI = (() => {
     counterPeriod: document.getElementById("counter-period") as HTMLSelectElement,
     timer: document.getElementById("timer") as HTMLSelectElement,
     timerMode: document.getElementById("timer-mode") as HTMLSelectElement,
+    then: new Date(),
     rangeStartTime: document.getElementById("start-time") as HTMLTextAreaElement,
     rangeStartAMPM: document.getElementById("start-am-pm") as HTMLSelectElement,
     rangeEndTime: document.getElementById("end-time") as HTMLTextAreaElement,
@@ -64,9 +65,19 @@ const UI = (() => {
 
     if (selectedValue){
       document.body.classList.add("timer-YES");
-      document.body.classList.add("timer-details-RANGE");
+      chrome.storage.local.get('timerMode', (result) => {
+        if (result.timerMode === 'RANGE') {
+          document.body.classList.add('timer-details-RANGE');
+          document.body.classList.remove('timer-details-DURATION')
+        } else if (result.timerMode === 'DURATION') {
+          document.body.classList.add('timer-details-DURATION');
+          document.body.classList.remove('timer-details-RANGE');
+        }
+      });
+      // document.body.classList.add("timer-details-RANGE");
     } else if (!selectedValue) {
       document.body.classList.add("timer-NO");
+      document.body.classList.remove("timer-details-RANGE", "timer-details-DURATION");
     }
 
     storage.set({ timer: selectedValue});
@@ -88,33 +99,39 @@ const UI = (() => {
     storage.set({ timerMode: selectedValue });
   });
 
-  // elements.rangeStartTime.addEventListener("input", (event) => {
-  //   const rangeStartTime = getEventTargetValue(event);
-  //   storage.set({ rangeStartTime });
-  // });
+  elements.rangeStartTime.addEventListener("input", (event) => {
+    const rangeStartTime = getEventTargetValue(event);
+    storage.set({ rangeStartTime });
+  });
 
-  // elements.rangeStartAMPM.addEventListener("change", (event) => {
-  //   const rangeStartAMPM = getEventTargetValue(event) as AmPm;
-  //   storage.set({ rangeStartAMPM });
-  // });
+  elements.rangeStartAMPM.addEventListener("change", (event) => {
+    const rangeStartAMPM = getEventTargetValue(event) as AmPm;
+    storage.set({ rangeStartAMPM });
+  });
 
-  // elements.rangeEndTime.addEventListener("input", (event) => {
-  //   const rangeEndTime = getEventTargetValue(event);
-  //   storage.set({ rangeEndTime });
-  // });
+  elements.rangeEndTime.addEventListener("input", (event) => {
+    const rangeEndTime = getEventTargetValue(event);
+    storage.set({ rangeEndTime });
+  });
 
-  // elements.rangeEndAMPM.addEventListener("change", (event) => {
-  //   const rangeEndAMPM = getEventTargetValue(event) as AmPm;
-  //   storage.set({ rangeEndAMPM });
-  // });
+  elements.rangeEndAMPM.addEventListener("change", (event) => {
+    const rangeEndAMPM = getEventTargetValue(event) as AmPm;
+    storage.set({ rangeEndAMPM });
+  });
 
   elements.durationHours.addEventListener("input", (event) => {
     const durationHours = Number(getEventTargetValue(event));
+    const date = new Date();
+
+    storage.set({ then: date });
     storage.set({ durationHours });
   });
 
   elements.durationMinutes.addEventListener("input", (event) => {
     const durationMinutes = Number(getEventTargetValue(event));
+    const date = new Date();
+
+    storage.set({ then: date });
     storage.set({ durationMinutes });
   });
 
@@ -160,21 +177,25 @@ const UI = (() => {
       elements.timerMode.value = items.timerMode;
     }
 
-    // if (items.rangeStartTime !== undefined) {
-    //   elements.rangeStartTime.value = items.rangeStartTime;
-    // }
+    if (items.then !== undefined) {
+      elements.then = new Date(items.then); 
+    }
 
-    // if (items.rangeStartAMPM !== undefined) {
-    //   elements.rangeStartAMPM.value = items.rangeStartAMPM;
-    // }
+    if (items.rangeStartTime !== undefined) {
+      elements.rangeStartTime.value = items.rangeStartTime;
+    }
 
-    // if (items.rangeEndTime !== undefined) {
-    //   elements.rangeEndTime.value = items.rangeEndTime;
-    // }
+    if (items.rangeStartAMPM !== undefined) {
+      elements.rangeStartAMPM.value = items.rangeStartAMPM;
+    }
 
-    // if (items.rangeEndAMPM !== undefined) {
-    //   elements.rangeEndAMPM.value = items.rangeEndAMPM;
-    // }
+    if (items.rangeEndTime !== undefined) {
+      elements.rangeEndTime.value = items.rangeEndTime;
+    }
+
+    if (items.rangeEndAMPM !== undefined) {
+      elements.rangeEndAMPM.value = items.rangeEndAMPM;
+    }
 
     if (items.durationHours !== undefined) {
       elements.durationHours.value = items.durationHours.toString();
@@ -189,6 +210,26 @@ const UI = (() => {
 })();
 
 window.addEventListener("DOMContentLoaded", () => {
+  chrome.storage.local.get('timer', (result) => {
+    if (result.timer) {
+      document.body.classList.add('timer-YES');
+    } else {
+      document.body.classList.remove('timer-YES');
+      document.body.classList.remove('timer-details-RANGE');
+      document.body.classList.remove('timer-details-DURATION')
+    }
+  });
+
+  chrome.storage.local.get('timerMode', (result) => {
+    if (result.timerMode === 'RANGE') {
+      document.body.classList.add('timer-details-RANGE');
+      document.body.classList.remove('timer-details-DURATION')
+    } else if (result.timerMode === 'DURATION') {
+      document.body.classList.add('timer-details-DURATION');
+      document.body.classList.remove('timer-details-RANGE');
+    }
+  });
+
   const keys: (keyof Schema)[] = [
     "enabled",
     "contextMenu",
@@ -197,10 +238,10 @@ window.addEventListener("DOMContentLoaded", () => {
     "counterShow",
     "counterPeriod",
     "timer",
-    // "rangeStartTime",
-    // "rangeStartAMPM",
-    // "rangeEndTime",
-    // "rangeEndAMPM",
+    "rangeStartTime",
+    "rangeStartAMPM",
+    "rangeEndTime",
+    "rangeEndAMPM",
     "durationHours",
     "durationMinutes"
   ];

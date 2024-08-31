@@ -71,6 +71,12 @@ body:not(.timer-details-DURATION) #timer-duration-details {
   margin-bottom: 6px;
 }
 
+.ampm.option {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
 .option.baseline {
   align-items: baseline;
 }
@@ -78,6 +84,38 @@ body:not(.timer-details-DURATION) #timer-duration-details {
 .option > div {
   display: flex;
   flex-direction: column;
+}
+
+.text-container {
+  display: flex;
+  flex-direction: row;
+  margin: 1em 0;
+  align-items: center;
+}
+
+.text-container > div {
+  align-self: flex-start;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  background: var(--border-color);
+  color: var(--input-background-color);
+  font-weight: bold;
+}
+
+.text-container textarea {
+  border-radius: 0 var(--border-radius) var(--border-radius) var(--border-radius);
+  border: 3px solid var(--border-color);
+  background-color: var(--input-background-color);
+  color: var(--text-color);
+  outline: none;
+  resize: none;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1100px;
+  height: 35px;
+  /* margin: 0; */
 }
 
 .row {

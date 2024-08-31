@@ -52,24 +52,24 @@
             </div>
 
             <fieldset id="timer-range-details">
-              <legend>Range Details</legend>
+              <legend class="hidden-label">Range Details</legend>
               <div class="row">
-                <div class="option">
-                  <label for="start-time">Start Hour:</label>
+                <div class="text-container">
+                  <label for="start-time">Start:</label>
                   <textarea id="start-time" rows="1" cols="5" spellcheck="false"></textarea>
                 </div>
-                <div class="option">
+                <div class="ampm-option">
                   <label class="hidden-label">AM/PM:</label>
                   <select id="start-am-pm">
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
                   </select>
                 </div>
-                <div class="option">
-                  <label for="end-time">End Hour:</label>
+                <div class="text-container">
+                  <label for="end-time">End:</label>
                   <textarea id="end-time" rows="1" cols="5" spellcheck="false"></textarea>
                 </div>          
-                <div class="option">
+                <div class="ampm-option">
                   <label class="hidden-label">AM/PM:</label>
                   <select id="end-am-pm">
                     <option value="AM">AM</option>
@@ -81,13 +81,13 @@
           </fieldset>
 
           <fieldset id="timer-duration-details">
-            <legend>Duration Details</legend>
+            <legend class="hidden-label">Duration Details</legend>
             <div class="row">
-              <div class="option">
+              <div class="text-container">
                 <label for="hours">Hours:</label>
                 <textarea id="hours" rows="1" cols="3" spellcheck="false"></textarea>
               </div>
-              <div class="option">
+              <div class="text-container">
                 <label for="minutes">Minutes:</label>
                 <textarea id="minutes" rows="1" cols="2" spellcheck="false"></textarea>
               </div>

@@ -97,6 +97,3 @@ export const BLOCKED_EXAMPLE: string[] = [
   "example.com/???/     # ? = any one character",
   "example.com/app/*",
 ];
-
-// export const START_EXAMPLE: string = "9:00";
-// export const END_EXAMPLE: string = "5:00";

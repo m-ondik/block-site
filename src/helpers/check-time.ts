@@ -3,6 +3,7 @@ export const checkTimeRange = (startTime:number, startAMPM: string, endTime: num
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
     const startTimeAMPM = startAMPM === "PM" ? startTime+760 : startTime;
     const endTimeAMPM = endAMPM === "PM" ? endTime+760 : endTime;
+    console.log("checkTimeRange called, currentMinutes, startTimeAMPM, endTimeAMPM:", currentMinutes, startTimeAMPM, endTimeAMPM);
 
     return currentMinutes >= startTimeAMPM && currentMinutes < endTimeAMPM;
 } 
@@ -11,7 +12,8 @@ export const checkTimeDuration = (hours: number, minutes: number, then: Date): b
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
     const thenMinutes = then.getHours()*60+ then.getMinutes();
-    const blockedMinutes = hours*60+minutes*60;
+    const blockedMinutes = hours*60+minutes;
+    console.log("checkTimeDuration called, currentMinutes, thenMinutes, blockedMinutes:", currentMinutes, thenMinutes, blockedMinutes);
 
     return currentMinutes - thenMinutes < blockedMinutes
 }
@@ -29,17 +31,3 @@ const totalMinutes = hours * 60 + minutes;
 
 return totalMinutes;
 }
-
-// function convertMinutesToTime(minutes: number): string {
-// // Calculate hours and remaining minutes
-// const hours = Math.floor(minutes / 60);
-// const remainingMinutes = minutes % 60;
-
-// // Format hours and minutes as strings with leading zeros if necessary
-// const hoursStr = hours.toString();
-// const minutesStr = remainingMinutes.toString().padStart(2, '0');
-
-// // Return the time string in "H:MM" format
-// return `${hoursStr}:${minutesStr}`;
-// }
-
